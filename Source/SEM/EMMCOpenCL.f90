@@ -186,7 +186,7 @@ integer(c_int32_t)             :: ierr, pcnt, ierr2
 integer(c_size_t),target       :: slength
 integer(c_intptr_t),target     :: ctx_props(3)
 character(3),target            :: kernelname 
-character(5),target            :: kernelname2
+character(6),target            :: kernelname2
 character(19),target           :: progoptions
 character(fnlen),target        :: info ! info about the GPU
 integer(c_int64_t)             :: cmd_queue_props
