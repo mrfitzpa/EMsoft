@@ -1559,7 +1559,7 @@ logical                                 :: found, fexists, jexists
 character(fnlen)                        :: confname, emsoftname, jsonname, jsonfilename, fname, cwd, &
                                            dirname, library, dataname, xtalname, platform
 character(3)                            :: release, develop
-character(len=1)                        :: edp, tab, yesno, EMsoftnativedelimiter
+character(len=1)                        :: edp, tab, yesno, EMsoftnativedelimiter, JSONdelimiter
 
 edp = '"'
 tab = CHAR(9)
@@ -1574,6 +1574,8 @@ jsonfilename = SC_jsonfilename
 
 ! determine the pathname delimiter character
 EMsoftnativedelimiter = EMsoft_getEMsoftnativedelimiter()
+! note that json files ALWAYS use the UNIX delimiter '/', even on Windows systems !
+JSONdelimiter = '/'
 
 ! get the config file name
 jsonname = trim(EMsoft_getConfigpath())//EMsoftnativedelimiter//trim(jsonfilename)
@@ -1647,15 +1649,15 @@ if (present(config)) then
     open(unit=dataunit,file=trim(jsonname),status='new',form='formatted')
     write (dataunit,"('{')")
     write (dataunit,"(A,A,'EMsoftpathname',A,': ',A,A,A,',')") tab, edp, edp, edp, &
-       trim(EMsoft_getUserHomePath())//EMsoftnativedelimiter,edp
+       trim(EMsoft_getUserHomePath())//JSONdelimiter,edp
     write (dataunit,"(A,A,'EMXtalFolderpathname',A,': ',A,A,A,',')") tab, edp, edp, edp, &
-       trim(EMsoft_getUserHomePath())//EMsoftnativedelimiter,edp
+       trim(EMsoft_getUserHomePath())//JSONdelimiter,edp
     write (dataunit,"(A,A,'EMdatapathname',A,': ',A,A,A,',')") tab, edp, edp, edp, &
-       trim(EMsoft_getUserHomePath())//EMsoftnativedelimiter,edp
+       trim(EMsoft_getUserHomePath())//JSONdelimiter,edp
     write (dataunit,"(A,A,'EMtmppathname',A,': ',A,A,A,',')") tab, edp, edp, edp, &
-       trim(fname)//EMsoftnativedelimiter,edp
+       trim(fname)//JSONdelimiter,edp
     write (dataunit,"(A,A,'EMsoftLibraryLocation',A,': ',A,A,A,',')") tab, edp, edp, edp, &
-       trim(EMsoft_getUserHomePath())//EMsoftnativedelimiter,edp
+       trim(EMsoft_getUserHomePath())//JSONdelimiter,edp
     write (dataunit,"(A,A,'Release',A,': ',A,A,A,',')") tab, edp, edp, edp, trim(release), edp
     write (dataunit,"(A,A,'Develop',A,': ',A,A,A,',')") tab, edp, edp, edp, trim(develop), edp
 
