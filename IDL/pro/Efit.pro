@@ -192,7 +192,7 @@ Efitwidget_s = {widgetstruct, $
 
 ; data structure
 Efitdata = {Efitdatastruct, $
-                os_family:'',
+                os_family:'', $
                 scrdimx:fix(0), $
                 scrdimy:fix(0), $
                 xlocation:fix(0), $

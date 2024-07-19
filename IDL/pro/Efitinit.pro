@@ -43,6 +43,7 @@
 ;> @date 10/17/15 MDG 1.2 removed array computations; moved to callable f90 code in EMdymod.f90
 ;> @date 10/24/16 MDG 1.3 modified for new HDF5 file organization
 ;> @date 01/20/17 MDG 1.4 added support for TKD input files
+;> @date 07/19/24 MDG 1.5 correction of HDF5 dataset names for TKD input
 ;--------------------------------------------------------------------------
 pro Efitinit,dummy
 
