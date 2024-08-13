@@ -630,6 +630,7 @@ type EBSDNameListType
         character(fnlen)        :: targetfile
         character(fnlen)        :: energyfile
         character(fnlen)        :: datafile
+        character(fnlen)        :: tiff_prefix
 end type EBSDNameListType
 
 ! namelist for the EMEBSDBatch program

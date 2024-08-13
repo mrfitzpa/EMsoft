@@ -4039,13 +4039,14 @@ character(fnlen)        :: anglefiletype
 character(fnlen)        :: masterfile
 character(fnlen)        :: energyfile  ! removed from template file 05/16/19 [MDG]
 character(fnlen)        :: datafile
+character(fnlen)        :: tiff_prefix
 
 ! define the IO namelist to facilitate passing variables to the program.
 namelist  / EBSDdata / stdout, L, thetac, delta, numsx, numsy, xpc, ypc, anglefile, eulerconvention, masterfile, bitdepth, &
                         energyfile, datafile, beamcurrent, dwelltime, energymin, energymax, binning, gammavalue, alphaBD, &
                         scalingmode, axisangle, nthreads, outputformat, maskpattern, energyaverage, spatialaverage, &
                         applyDeformation, Ftensor, includebackground, anglefiletype, makedictionary, hipassw, nregions, &
-                        maskradius, poisson, Fframe
+                        maskradius, poisson, Fframe, tiff_prefix
 
 ! set the input parameters to default values (except for xtalname, which must be present)
 stdout          = 6
@@ -4088,6 +4089,7 @@ anglefiletype   = 'orientations'! 'orientations' or 'orpcdef'
 masterfile      = 'undefined'   ! filename
 energyfile      = 'undefined'   ! name of file that contains energy histograms for all scintillator pixels (output from MC program)
 datafile        = 'undefined'   ! output file name
+tiff_prefix     = 'undefined'   ! used to output individual tiff files for patterns
 spatialaverage  = 'n'
 
 if (present(initonly)) then
@@ -4169,6 +4171,7 @@ enl%masterfile = masterfile
 ! user definition, if any, in the namelist file is overwritten here...
 enl%energyfile = enl%masterfile       ! changed on 05/16/19 [MDG]
 enl%datafile = datafile
+enl%tiff_prefix = tiff_prefix
 enl%spatialaverage = spatialaverage
 end subroutine GetEBSDNameList
 

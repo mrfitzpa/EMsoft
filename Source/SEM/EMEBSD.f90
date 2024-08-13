@@ -309,6 +309,8 @@ use omp_lib
 use timing
 use stringconstants
 use math
+use image
+use, intrinsic :: iso_fortran_env
 
 IMPLICIT NONE
 
@@ -381,8 +383,8 @@ character(11)                           :: dstr
 character(15)                           :: tstrb
 character(15)                           :: tstre
 character(10)                           :: char10
-character(fnlen)                        :: datafile
-logical                                 :: overwrite = .TRUE., insert = .TRUE., singlebatch
+character(fnlen)                        :: datafile, TIFF_filename
+logical                                 :: overwrite = .TRUE., insert = .TRUE., singlebatch, tiff_output=.FALSE.
 character(5)                            :: bitmode
 integer(kind=irg)                       :: numbits
 real(kind=sgl)                          :: bitrange
@@ -391,6 +393,15 @@ real(kind=sgl)                          :: bitrange
 real(kind=dbl)                          :: Umatrix(3,3), Fmatrix(3,3), Smatrix(3,3), quF(4), Fmatrix_inverse(3,3), &
                                            Gmatrix(3,3), gs2c(3,3)
 logical                                 :: includeFmatrix=.FALSE., noise
+
+! declare variables for use in object oriented image module
+integer                                 :: iostat
+character(len=128)                      :: iomsg
+logical                                 :: isInteger
+type(image_t)                           :: im
+character(6)                            :: TIFF_number
+integer(int8)                           :: i8 (3,4)
+integer(int8), allocatable              :: TIFF_image(:,:)
 
 !====================================
 ! max number of OpenMP threads on this platform
@@ -411,6 +422,8 @@ if (enl%makedictionary.eq.'y') then
   bitmode = 'dict'
   call Message('Program will work in dictionary generation mode')
 end if
+
+if (trim(enl%tiff_prefix).ne.'undefined') tiff_output = .TRUE. 
 
 ! define some energy-related parameters derived from MC input parameters
 !====================================
@@ -1133,6 +1146,32 @@ dataset = SC_EBSDpatterns
        if (hdferr.ne.0) call HDF_handleError(hdferr,'HDF_writeHyperslabFloatArray3D EBSDpatterns')
      end if
    end if
+
+! ! should we write out individual patterns ? (tiff_output=.TRUE.)
+!    if ((trim(bitmode).eq.'char').and.(tiff_output.eqv..TRUE.)) then 
+!     allocate(TIFF_image(binx,biny))
+! ! Create a tiff file name 
+!     do i=1,dim2
+!       TIFF_filename = trim(EMsoft_getEMdatapathname())//trim(enl%tiff_prefix)
+!       write (TIFF_number,"(I6.6)") iang-1
+!       TIFF_filename = trim(TIFF_filename)//TIFF_number//'.tiff'
+!       TIFF_filename = EMsoft_toNativePath(TIFF_filename)
+!       ma = maxval(ECPpattern)
+!       mi = minval(ECPpattern)
+!       ECPpatternintd = ((ECPpattern - mi)/ (ma-mi))
+!       if (enl%maskpattern.eq.'y')  ECPpatternintd = ECPpatternintd * mask 
+!       TIFF_image = nint(255.0*ECPpatternintd)
+! ! set up the image_t structure
+!       im = image_t(TIFF_image)
+!       if(im%empty()) call Message("EMECP","failed to convert array to image")
+
+! ! create the file
+!       call im%write(trim(TIFF_filename), iostat, iomsg) ! format automatically detected from extension
+!       if(0.ne.iostat) then
+!         call Message("failed to write image to file : "//iomsg)
+!       end if 
+!     end do
+!    end if 
  !end if
 ! =====================================================
 ! end of HDF_FileVersion = 4.0 write statements

@@ -315,12 +315,22 @@ end if
 
 ! intercept the case where the exptnumsx/y parameters are set to zero, but 
 ! numsx/y are not...
-if (dinl%exptnumsx.eq.0) dinl%exptnumsx = dinl%numsx
-if (dinl%exptnumsy.eq.0) dinl%exptnumsy = dinl%numsy
-
+!
+! this if statement is a consequence of an error discovered on 08/13/24 that only 
+! affects the Binary inputtype ... 
+if (trim(dinl%inputtype).eq.'Binary') then 
+  if (dinl%exptnumsx.eq.0) dinl%exptnumsx = dinl%numsx/dinl%binning
+  if (dinl%exptnumsy.eq.0) dinl%exptnumsy = dinl%numsy/dinl%binning
 ! binned pattern array size for experimental patterns
-binx = dinl%exptnumsx/dinl%binning
-biny = dinl%exptnumsy/dinl%binning
+  binx = dinl%exptnumsx
+  biny = dinl%exptnumsy
+else
+  if (dinl%exptnumsx.eq.0) dinl%exptnumsx = dinl%numsx
+  if (dinl%exptnumsy.eq.0) dinl%exptnumsy = dinl%numsy
+! binned pattern array size for experimental patterns
+  binx = dinl%exptnumsx/dinl%binning
+  biny = dinl%exptnumsy/dinl%binning
+end if 
 bindx = 1.0/float(dinl%binning)**2
 ! we also force the dictionary patterns to have this size 
 dinl%numsx = binx
@@ -347,9 +357,9 @@ if (trim(dinl%indexingmode).eq.'dynamic') then
     ! and then generate the detector arrays
     enl%numsx = dinl%numsx
     enl%numsy = dinl%numsy
-    enl%xpc = dinl%xpc
-    enl%ypc = dinl%ypc
-    enl%delta = dinl%delta
+    enl%xpc = dinl%xpc/dinl%binning
+    enl%ypc = dinl%ypc/dinl%binning
+    enl%delta = dinl%delta*dinl%binning
     enl%thetac = dinl%thetac
     enl%L = dinl%L
     enl%energymin = dinl%energymin

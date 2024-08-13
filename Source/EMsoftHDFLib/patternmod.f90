@@ -323,6 +323,8 @@ select case (itype)
         end if
         ! get the first byte to check if this file is version 1-3 or 4
         ! version 4 has an extra byte in the header...
+        ! version 5 does as well, offsets the pattern offsets by an additional 25 bytes,
+        ! and increases the pattern headder from 16 to 42 bytes 
         read(unit=funit, pos=1, iostat=ios) header
         ebspversion = 256-iachar(header)
         io_int(1) = ebspversion
@@ -626,11 +628,12 @@ select case (itype)
     case(5)  ! "OxfordBinary"
 
 ! read position of patterns in file for a single row from the header
-    if (ebspversion.eq.4) then
+    if (ebspversion.gt.3) then
         read(unit=funit, pos=(liii-1)*lwd*8+10, iostat=ios) patoffsets
     else
         read(unit=funit, pos=(liii-1)*lwd*8+9, iostat=ios) patoffsets
     end if
+    if (ebspversion.eq.5) patoffsets = patoffsets + 25_8
 
 ! generate a buffer to load individual patterns into
       buffersize = lL
@@ -642,7 +645,11 @@ select case (itype)
 
       do ii=1,lwd
 ! read each pattern into buffer with the 16 bytes of metadata skipped
-        read(unit=funit, pos=patoffsets(ii)+17_8, iostat=ios) buffer
+        if (ebspversion.eq.5) then 
+            read(unit=funit, pos=patoffsets(ii)+43_8, iostat=ios) buffer
+        else
+            read(unit=funit, pos=patoffsets(ii)+17_8, iostat=ios) buffer
+        end if
 
 ! loop over pixels and convert the byte values into single byte integers
         do jj=1_ill,lL
@@ -956,13 +963,18 @@ select case (itype)
       else
           read(unit=funit, pos=(liii-1)*lwd*8+9, iostat=ios) patoffsets
       end if
+      if (ebspversion.eq.5) patoffsets = patoffsets + 25_8
 
 ! generate buffers to load individual pattern into
       buffersize = lL
       allocate(buffer(buffersize), pairs(buffersize))
 
 ! read single pattern into buffer with the 16 bytes of metadata skipped
-      read(unit=funit, pos=patoffsets(l1)+17_8, iostat=ios) buffer
+      if (ebspversion.eq.5) then 
+          read(unit=funit, pos=patoffsets(l1)+43_8, iostat=ios) buffer
+      else
+          read(unit=funit, pos=patoffsets(l1)+17_8, iostat=ios) buffer
+      end if
 
 ! convert the byte values into single byte integers
       pairs = ichar(buffer) 
@@ -2622,7 +2634,7 @@ end subroutine PreProcessPatterns
 !
 !> @date 11/30/18 MDG 1.0 original, based on EBSD routine
 !--------------------------------------------------------------------------
-recursive subroutine PreProcessTKDPatterns(nthreads, inRAM, tkdnl, binx, biny, masklin, correctsize, totnumexpt, &
+recursive subroutine PreProcessTKDPatterns(nthreads, inRAM, tkdnl, binx, biny, mask, correctsize, totnumexpt, &
                                         epatterns, exptIQ)
 !DEC$ ATTRIBUTES DLLEXPORT :: PreProcessTKDPatterns
 
@@ -2645,7 +2657,7 @@ logical,INTENT(IN)                          :: inRAM
 type(TKDIndexingNameListType),INTENT(IN)    :: tkdnl
 integer(kind=irg),INTENT(IN)                :: binx
 integer(kind=irg),INTENT(IN)                :: biny
-real(kind=sgl),INTENT(IN)                   :: masklin(binx*biny)
+real(kind=sgl),INTENT(IN)                   :: mask(binx, biny)
 integer(kind=irg),INTENT(IN)                :: correctsize
 integer(kind=irg),INTENT(IN)                :: totnumexpt
 real(kind=sgl),INTENT(INOUT),OPTIONAL       :: epatterns(correctsize, totnumexpt)
@@ -2834,6 +2846,9 @@ prepexperimentalloop: do iii = iiistart,iiiend
           TKDPat(1:binx,kk) = exppatarray((jj-1)*patsz+(kk-1)*binx+1:(jj-1)*patsz+kk*binx)
         end do
 
+! apply the mask
+        TKDpat = TKDpat * mask 
+
         if (present(exptIQ)) then
 ! compute the pattern Image Quality 
           exptIQ((iii-iiistart)*jjend + jj) = sngl(computeEBSDIQ(binx, biny, TKDPat, ksqarray, Jres, planf))
@@ -2849,7 +2864,7 @@ prepexperimentalloop: do iii = iiistart,iiiend
         mi = minval(TKDPat)
     
         TKDpint = nint(((TKDPat - mi) / (ma-mi))*255.0)
-        TKDPat = float(adhisteq(tkdnl%nregions,binx,biny,TKDpint))
+        TKDPat = float(adhisteq(tkdnl%nregions,binx,biny,TKDpint)) * mask
 
 ! convert back to 1D vector
         do kk=1,biny
@@ -2857,7 +2872,7 @@ prepexperimentalloop: do iii = iiistart,iiiend
         end do
 
 ! apply circular mask and normalize for the dot product computation
-        exppatarray((jj-1)*patsz+1:(jj-1)*patsz+L) = exppatarray((jj-1)*patsz+1:(jj-1)*patsz+L) * masklin(1:L)
+        exppatarray((jj-1)*patsz+1:(jj-1)*patsz+L) = exppatarray((jj-1)*patsz+1:(jj-1)*patsz+L) ! * masklin(1:L)
         vlen = vecnorm(exppatarray((jj-1)*patsz+1:(jj-1)*patsz+L))
         if (vlen.ne.0.0) then
           exppatarray((jj-1)*patsz+1:(jj-1)*patsz+L) = exppatarray((jj-1)*patsz+1:(jj-1)*patsz+L)/vlen

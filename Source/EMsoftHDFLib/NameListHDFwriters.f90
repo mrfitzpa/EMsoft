@@ -2911,6 +2911,11 @@ line2(1) = trim(enl%masterfile)
 hdferr = HDF_writeDatasetStringArray(dataset, line2, 1, HDF_head)
 if (hdferr.ne.0) call HDF_handleError(hdferr,'HDFwriteEBSDNameList: unable to create masterfile dataset',.TRUE.)
 
+dataset = trim(enl%tiff_prefix)
+line2(1) = trim(enl%tiff_prefix)
+hdferr = HDF_writeDatasetStringArray(dataset, line2, 1, HDF_head)
+if (hdferr.ne.0) call HDF_handleError(hdferr,'HDFwriteEBSDNameList: unable to create tiff_prefix dataset',.TRUE.)
+
 dataset = SC_anglefile
 line2(1) = trim(enl%anglefile)
 hdferr = HDF_writeDatasetStringArray(dataset, line2, 1, HDF_head)

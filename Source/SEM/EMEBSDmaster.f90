@@ -780,12 +780,12 @@ energyloop: do iE=Estart,1,-1
   karray(1:3,1) = sngl(ktmp%k(1:3))
   karray(4,1) = sngl(ktmp%kn)
   kij(1:3,1) = (/ ktmp%i, ktmp%j, ktmp%hs /)
-   do ik=2,numk
-     ktmp => ktmp%next
-     karray(1:3,ik) = sngl(ktmp%k(1:3))
-     karray(4,ik) = sngl(ktmp%kn)
-     kij(1:3,ik) = (/ ktmp%i, ktmp%j, ktmp%hs /)
-   end do
+  do ik=2,numk
+    ktmp => ktmp%next
+    karray(1:3,ik) = sngl(ktmp%k(1:3))
+    karray(4,ik) = sngl(ktmp%kn)
+    kij(1:3,ik) = (/ ktmp%i, ktmp%j, ktmp%hs /)
+  end do
 ! and remove the linked list
   call Delete_kvectorlist(khead)
 
