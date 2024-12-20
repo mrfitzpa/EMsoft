@@ -1,5 +1,5 @@
-Build notes on eroica
-=====================
+Build notes on pastorale
+========================
 
 Install dependencies
 --------------------
@@ -20,12 +20,12 @@ Run::
   cd EMsoftBuild
   mkdir Release
   cd Release
-  sudo cmake -DCMAKE_BUILD_TYPE=Release -DEMsoft_SDK=/opt/EMsoft/EMsoft_SDK ../../EMsoft
+  sudo cmake -DCMAKE_BUILD_TYPE=Release -DEMsoft_SDK=/mnt/opt/EMsoft/EMsoft_SDK ../../EMsoft
   sudo make -j
   cd ../
   mkdir Debug
   cd Debug
-  sudo cmake -DCMAKE_BUILD_TYPE=Debug -DEMsoft_SDK=/opt/EMsoft/EMsoft_SDK ../../EMsoft
+  sudo cmake -DCMAKE_BUILD_TYPE=Debug -DEMsoft_SDK=/mnt/opt/EMsoft/EMsoft_SDK ../../EMsoft
   sudo make -j
 
 Update PATH variable
@@ -35,4 +35,4 @@ For each user ``<user>``, add the following lines to the file at
 ``/home/<user>/.bashrc``::
 
   # Add path to EMsoft.
-  export PATH="/opt/EMsoft/EMsoftBuild/Release/Bin:$PATH"
+  export PATH="/mnt/opt/EMsoft/EMsoftBuild/Release/Bin:$PATH"
